@@ -9,12 +9,58 @@ class Store {
     }
 
     loadWeekData() {
+        console.log(localStorage.getItem('weeklyData'))
         return localStorage.getItem('weeklyData')? JSON.parse(localStorage.weeklyData) : []
     }
 
-    saveWeekData(weeklyData) {
-        localStorage.setItem('weeklyData', JSON.stringify(weeklyData) );
+    contentChanged(day, task, val) {
+        this.currWeek = this.weeklyData.splice(-1)[0];
+        this.currWeek.data[day][task] = val;
+        this.weeklyData.push(this.currWeek)
+        this.saveWeekData();
     }
+
+    saveWeekData() {
+        localStorage.setItem('weeklyData', JSON.stringify(this.weeklyData) );
+    }
+}
+
+class Week {
+    constructor(tasks) {
+        this.data = [];
+        let date = this.getNearestMonday();
+        for(let i = 0;i < 7;i++) {
+            let dayObj = this.createTaskObj(tasks);
+            let dateAndDay = this.getDateAndDay(date, i);
+            dayObj.date = dateAndDay[0];
+            dayObj.day = dateAndDay[1];
+            this.data.push(dayObj);
+        }   
+    }
+
+    getNearestMonday() {
+        let date = new Date();
+        let day = date.getDay();
+        if(day == 0)
+            day = 7;
+        date.setDate(date.getDate() - day + 1);
+        return date;
+    }    
+
+    createTaskObj(tasks) {
+        let obj = {};
+        tasks.forEach( task => {
+            obj[task] = "";
+        })
+        return obj;
+    }
+
+    getDateAndDay(date, i) {
+        let temp = new Date(date);
+        temp.setDate(date.getDate() + i);
+        return [`${temp.getDate()}/${temp.getMonth() + 1}/${temp.getFullYear()}`, temp.getDay()];
+    }
+    
 }
 
 
@@ -31,17 +77,16 @@ const tasks = [
     "Exercise2",
 ]
 
-let week = [];
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 const tableBody = document.querySelector("table tbody")
 const reloadBtn = document.querySelector(".reload-table-btn");
 const addTaskBtn = document.querySelector(".add-task-btn");
 
-function loadTable() {
+function loadTable(week) {
     tableBody.innerHTML = "";
     let todaysday = (new Date()).getDay();
-    todaysday = (todaysday - 1) % 7;
+    todaysday = (todaysday + 7 - 1) % 7;
     tasks.forEach( task => {
         const tr = document.createElement("tr");
         const td = document.createElement("td");
@@ -52,7 +97,7 @@ function loadTable() {
         for(let i = 0;i < 7;i++) {
             const td = document.createElement("td");
             const p = document.createElement("p");
-            p.innerText =  week[i][task];
+            p.innerText =  week.data[i][task]? week.data[i][task]: "";
             if(i >= todaysday)
                 p.setAttribute("contenteditable", true)
             else
@@ -64,12 +109,13 @@ function loadTable() {
     })
 }
 
-function loadTableHead() {
+function loadTableHead(week) {
     const tableHead = document.querySelector("table thead");
     tableHead.innerHTML = ""
     const tr1 = document.createElement("tr");
     const th1 = document.createElement("th");
     const p1 = document.createElement("p");
+   
     const tr2 = document.createElement("tr");
     const th2 = document.createElement("th");
     const p2 = document.createElement("p");
@@ -82,7 +128,7 @@ function loadTableHead() {
     th2.appendChild(p2);
     tr2.appendChild(th2);
 
-    week.forEach( dayObj => {
+    week.data.forEach( dayObj => {
         const th1 = document.createElement("th");
         const p1 = document.createElement("p");
         const th2 = document.createElement("th");
@@ -100,55 +146,21 @@ function loadTableHead() {
     tableHead.appendChild(tr2);
 }
 
-function createTaskObj() {
-    let obj = {};
-    tasks.forEach( task => {
-        obj[task] = "";
-    })
-    return obj;
-}
-
-function createWeek() {
-    week = [];
-    let date = getNearestMonday();
-    for(let i = 0;i < 7;i++) {
-        let dayObj = createTaskObj();
-        let dateAndDay = getDateAndDay(date, i);
-        dayObj.date = dateAndDay[0];
-        dayObj.day = dateAndDay[1];
-        week.push(dayObj);
-    }
-}
-
-// function load() {
-//     createWeek();
-//     loadTableHead();
-//     loadTable();    
-// }
-
-function getDateAndDay(date, i) {
-    let temp = new Date(date);
-    temp.setDate(date.getDate() + i);
-    return [`${temp.getDate()}/${temp.getMonth() + 1}/${temp.getFullYear()}`, temp.getDay()];
-}
-
-function getNearestMonday() {
-    let date = new Date();
-    let day = date.getDay();
-    date.setDate(date.getDate() - day + 1);
-    return date;
-}
-
 tableBody.addEventListener('keyup', (event) => {
     // console.log(event.target.parentNode.cellIndex, event.target.parentNode.parentNode.rowIndex);
     // console.log(event);
     const day = +event.target.parentNode.cellIndex - 1;
     const task = tasks[+event.target.parentNode.parentNode.rowIndex - 2];
-    week[day][task] = event.target.innerText;
-    store.saveWeekData(week);
+    store.contentChanged(day, task, event.target.innerText);
 })
 
-reloadBtn.onclick = initApp;
+reloadBtn.onclick = () => {
+    initApp();
+    alert("app reloaded")
+}
+
+addTaskBtn.onclick = () => {
+}
 
 document.onload = initApp();
 
@@ -156,7 +168,30 @@ var store;
 
 function initApp() {
     store = new Store();
-    createWeek();
-    loadTableHead();
-    loadTable();
+    let currWeek = loadData();
+    renderScreen(currWeek);
+}
+
+function renderScreen(currWeek) {
+    loadTableHead(currWeek);
+    loadTable(currWeek);
+}
+
+function loadData() {
+    if( store.weeklyData.length == 0 || isNewWeek())
+        addNewWeek();
+    return store.weeklyData.slice(-1)[0];    
+}
+
+function addNewWeek() {
+    const week = new Week(tasks);
+    store.addWeekData(week);
+}
+
+function isNewWeek() {
+    const todaysDate = new Date();
+    const weekObj = store.weeklyData.slice(-1)[0];
+    const weekStartDate = new Date(weekObj.data[0].date);
+    let daysDiff = Math.floor( todaysDate.getTime() - weekStartDate.getTime() )/(1000*60*60*24);
+    return daysDiff > 6 && todaysDate.getDay() == 1;
 }
