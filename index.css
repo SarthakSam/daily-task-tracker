@@ -25,6 +25,10 @@ header {
     font-weight: 700;
 }
 
+a {
+    text-decoration: none;
+}
+
 table {
     margin: 10px auto;
     border: 1px solid black;
@@ -96,4 +100,54 @@ table tbody tr td p {
 .btn:hover {
     background-color: var(--text-color);
     color: white
+}
+
+#popup-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    /* display: none;    */
+    background: rgba(0, 0, 0, 0.7);
+    transition: opacity 1000ms;
+    visibility: hidden;
+    opacity: 0;
+}
+
+#popup-container:target {
+    /* display: block; */
+    visibility: visible;
+    opacity: 1;
+}
+
+.task-popup {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    height: 300px;
+    border-radius: 20px;
+    padding: 30px;
+    width: 30vw;
+    background: var(--title-color);
+    /* opacity: 1; */
+    transform:translate(-50%,-50%);
+    /* border: 1px solid blueviolet; */
+}
+
+.task-popup p {
+    font-size: 2.2rem;
+}
+
+.task-popup span {
+    color: white;
+    font-size: 1.2rem;
+    display: none;
+    text-shadow: 0px 0px 4px red;
+}
+
+.task-input {
+    width: 100%;
+    height: 30px;
+    margin: 30px 10px;
 }

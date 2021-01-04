@@ -9,7 +9,7 @@ class Store {
     }
 
     loadWeekData() {
-        console.log(localStorage.getItem('weeklyData'))
+        // console.log(localStorage.getItem('weeklyData'))
         return localStorage.getItem('weeklyData')? JSON.parse(localStorage.weeklyData) : []
     }
 
@@ -63,19 +63,38 @@ class Week {
     
 }
 
+class Tasks {
+    constructor() {
+        this.tasks = this.loadTasks();
+    }
 
-const tasks = [
-    "Meditation",
-    "Brush at Night",
-    "Pooja",
-    "Exercise",
-    "brush with charcoal",
-    "eye drops",
-    "Novel",
-    "Bhagvat Gita",
-    "Day Rev",
-    "Exercise2",
-]
+    loadTasks() {
+        return localStorage.getItem("tasks")? JSON.parse( localStorage.getItem("tasks") ): [];
+    }
+
+    saveTask(task) {
+        this.tasks.push(task);
+        localStorage.setItem("tasks", JSON.stringify( this.tasks) );
+    }
+
+    deleteTask(index) {
+        this.tasks.splice(index, 1);
+        localStorage.setItem("tasks", this.tasks);
+    }
+}
+
+// let tasks = [
+//     "Meditation",
+//     "Brush at Night",
+//     "Pooja",
+//     "Exercise",
+//     "brush with charcoal",
+//     "eye drops",
+//     "Novel",
+//     "Bhagvat Gita",
+//     "Day Rev",
+//     "Exercise2",
+// ]
 
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -87,7 +106,7 @@ function loadTable(week) {
     tableBody.innerHTML = "";
     let todaysday = (new Date()).getDay();
     todaysday = (todaysday + 7 - 1) % 7;
-    tasks.forEach( task => {
+    tasksObj.tasks.forEach( task => {
         const tr = document.createElement("tr");
         const td = document.createElement("td");
         const p = document.createElement("p");
@@ -160,14 +179,29 @@ reloadBtn.onclick = () => {
 }
 
 addTaskBtn.onclick = () => {
+    const taskInput = document.querySelector(".task-input");
+    const task = taskInput.value;
+    if(task) {
+        tasksObj.saveTask(task);
+        initApp();
+    }
+    else {
+        const span = document.querySelector("span.validation-message");
+        span.style.display = "initial";
+        setTimeout(() => {
+            span.style.display = "none"
+        }, 3000);
+    }
 }
 
 document.onload = initApp();
 
 var store;
+var tasksObj;
 
 function initApp() {
     store = new Store();
+    tasksObj = new Tasks();
     let currWeek = loadData();
     renderScreen(currWeek);
 }
@@ -191,7 +225,8 @@ function addNewWeek() {
 function isNewWeek() {
     const todaysDate = new Date();
     const weekObj = store.weeklyData.slice(-1)[0];
-    const weekStartDate = new Date(weekObj.data[0].date);
+    const prevWeekDateStr = weekObj.data[0].date;
+    const weekStartDate = new Date(+prevWeekDateStr.substring(6), +prevWeekDateStr.substring(3,5) - 1, +prevWeekDateStr.substring(0,2));
     let daysDiff = Math.floor( todaysDate.getTime() - weekStartDate.getTime() )/(1000*60*60*24);
     return daysDiff > 6 && todaysDate.getDay() == 1;
 }

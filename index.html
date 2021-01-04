@@ -9,7 +9,7 @@
 <body>
     <header>
         Task Tracker
-        <button class="btn add-task-btn">Add Task</button>
+        <a href="#popup-container" class="btn">Add Task</a>
         <button class="btn reload-table-btn">Reload Table</button>
     </header>
     <main>
@@ -20,6 +20,15 @@
             
         </table>
     </main>
+    <div id="popup-container">
+        <div class="task-popup">
+            <p>Enter Task Name</p>
+            <input type="text" class="task-input">
+            <span class="validation-message">Task Name Cannot be empty</span>
+            <button class="btn add-task-btn">Add</button>
+            <a href="#" class=" btn close-popup">Close</a>
+        </div>
+    </div>
     <script src="index.js"></script>
 </body>
 </html>
