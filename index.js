@@ -190,6 +190,7 @@ addTaskBtn.onclick = () => {
     const taskInput = document.querySelector(".task-input");
     const task = taskInput.value;
     if(task) {
+        taskInput.value = "";
         tasksObj.saveTask(task);
         initApp();
     }
