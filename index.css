@@ -8,7 +8,28 @@
 body {
     height: 100vh;
     background-color: var(--background-color);
+    position: relative;
 }
+
+body:before {
+    content: ' ';
+    position: absolute;
+    left: 0;
+    top: 10vh;
+    width: 100%;
+    height: 90vh;
+    z-index: 1;
+    opacity: 0.5;
+    background-image: url('images/background.svg');
+    background-repeat: no-repeat;
+    /* background-size: cover;   */
+}
+ 
+body main {
+    position: relative;
+    z-index: 2;
+}
+
 
 :root {
     --title-color:#991B1B;
@@ -57,12 +78,14 @@ table thead tr:first-child th {
 
 table tbody tr td {
     border: 2px solid var(--border-color);
+    font-weight: 700;
     width: 20px;
 }
 
 table tbody tr td:first-child {
     font-size: 1.2rem;
     padding: 10px;
+    text-transform: capitalize;
     /* position: fixed; */
     /* width: 120px; */
 }
@@ -82,7 +105,7 @@ table tbody tr td:first-child:hover > span {
 }
 
 table tbody tr td p {
-   width: 100px;
+   max-width: 150px;
    word-wrap: break-word;
    margin: auto;
    text-align: center;
