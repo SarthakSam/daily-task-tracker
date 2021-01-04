@@ -79,7 +79,7 @@ class Tasks {
 
     deleteTask(index) {
         this.tasks.splice(index, 1);
-        localStorage.setItem("tasks", this.tasks);
+        localStorage.setItem("tasks", JSON.stringify( this.tasks));
     }
 }
 
@@ -112,6 +112,14 @@ function loadTable(week) {
         const p = document.createElement("p");
         p.innerText = task;
         td.appendChild(p);
+        const span = document.createElement("span");
+        span.innerHTML = "&#10060;";
+        span.onclick = (event) => {
+            const taskIndex = +event.target.parentNode.parentNode.rowIndex - 2;
+            tasksObj.deleteTask(taskIndex);
+            initApp(); 
+        }
+        td.appendChild(span);
         tr.appendChild(td);
         for(let i = 0;i < 7;i++) {
             const td = document.createElement("td");
@@ -169,7 +177,7 @@ tableBody.addEventListener('keyup', (event) => {
     // console.log(event.target.parentNode.cellIndex, event.target.parentNode.parentNode.rowIndex);
     // console.log(event);
     const day = +event.target.parentNode.cellIndex - 1;
-    const task = tasks[+event.target.parentNode.parentNode.rowIndex - 2];
+    const task = tasksObj.tasks[+event.target.parentNode.parentNode.rowIndex - 2];
     store.contentChanged(day, task, event.target.innerText);
 })
 
@@ -218,7 +226,7 @@ function loadData() {
 }
 
 function addNewWeek() {
-    const week = new Week(tasks);
+    const week = new Week(tasksObj.tasks);
     store.addWeekData(week);
 }
 

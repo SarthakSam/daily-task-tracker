@@ -71,7 +71,17 @@ table tbody tr td:first-child {
 }
 
 table tbody tr td:first-child p {
-    width: 120px;
+    width: 150px;
+}
+
+table tbody tr td:first-child span {
+    display: none;
+    position: absolute;
+    transform: translate(-10px, -25px);
+}
+
+table tbody tr td:first-child:hover > span {
+    display: initial;
 }
 
 table tbody tr td p {
